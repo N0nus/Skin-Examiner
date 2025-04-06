@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skin Lesion Classifier</title>
+  <style>
+    :root {
+      --bg-color: #2c3e50;
+      --card-bg: #3c4a5a;
+      --accent-color: #3498db;
+      --text-color: #ecf0f1;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    body.light-mode {
+      --bg-color: #f7f7f7;
+      --card-bg: #ffffff;
+      --accent-color: #007bff;
+      --text-color: #333;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: 15px;
+      padding: 25px;
+      max-width: 420px;
+      width: 90%;
+      margin-top: 80px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--accent-color);
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    input[type="number"],
+    input[type="file"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    input[type="number"] {
+      width: 120px; /* Adjusted width for age input */
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: var(--accent-color);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .result-box {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 16px;
+      background-color: #e0f7ea;
+      color: #155724;
+    }
+
+    .result-box.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .result-box.warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .probability-bar {
+      height: 20px;
+      margin: 5px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .bar {
+      height: 100%;
+      background-color: #28a745;
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+
+    .bar.melanoma {
+      background-color: #dc3545;
+    }
+
+    .probability-label {
+      margin-left: 10px;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .footer a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    .camera-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      font-size: 25px;
+      cursor: pointer;
+      border: none;
+      background-color: transparent;
+      color: var(--accent-color);
+      z-index: 1000;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 25px;
+      cursor: pointer;
+      border: none;
+      background-color: transparent;
+      color: var(--accent-color);
+      z-index: 1000;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #imagePreview img {
+      width: 100%;
+      max-height: 220px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-top: 20px;
+    }
+
+  </style>
+</head>
+<body>
+  <button class="camera-toggle">📷</button>
+  <button class="mode-toggle" onclick="toggleMode()">🌙</button>
+
+  <div class="container">
+    <div class="header">Skin Lesion Classifier</div>
+    <form method="POST" enctype="multipart/form-data">
+      <label for="age">Age:</label>
+      <input type="number" name="age" id="age" step="1" placeholder="Enter age">
+
+      <label for="sex">Sex:</label>
+      <select name="sex" id="sex">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="unknown" selected>Unknown</option>
+      </select>
+
+      <label for="locality">Localization:</label>
+      <select name="locality" id="locality">
+        <option value="unknown">Unknown</option>
+        <option value="face">Face</option>
+        <option value="back">Back</option>
+        <option value="hand">Hand</option>
+        <option value="trunk">Trunk</option>
+        <option value="upper extremity">Upper Extremity</option>
+        <option value="lower extremity">Lower Extremity</option>
+        <option value="abdomen">Abdomen</option>
+        <option value="foot">Foot</option>
+        <option value="neck">Neck</option>
+        <option value="chest">Chest</option>
+        <option value="ear">Ear</option>
+        <option value="scalp">Scalp</option>
+        <option value="genital">Genital</option>
+      </select>
+
+      <label for="image">Upload Image:</label>
+      <input type="file" name="image" id="image" accept="image/*" onchange="previewImage(event)">
+
+      <button type="submit">Examine</button>
+    </form>
+
+    <!-- Image Preview -->
+    <div id="imagePreview"></div>
+
+
+    {% set class_names = {
+        'akiec': 'Actinic keratoses and intraepithelial carcinoma / Bowen\'s disease',
+        'bcc': 'Basal cell carcinoma',
+        'bkl': 'Benign keratosis-like lesions (solar lentigines / seborrheic keratoses and lichen-planus like keratoses)',
+        'df': 'Dermatofibroma',
+        'mel': 'Melanoma',
+        'nv': 'Melanocytic nevi',
+        'vasc': 'Vascular lesions (angiomas, angiokeratomas, pyogenic granulomas and hemorrhage)'
+      } %}
+  
+      {% if prediction %}
+        <div class="result-box {% if probabilities.mel > 0.4 %}error{% endif %}">
+          <strong>Potential Cause:</strong> {{ class_names[prediction] }}<br> <!-- Use full name here -->
+  
+          {% for class, prob in probabilities.items() %}
+          <div class="probability-bar">
+              <div class="bar {% if class == 'mel' %}melanoma{% endif %}" style="width: {{ prob|default(0)*100 }}%"></div>
+            <span class="probability-label">{{ class }}: {{ "%.2f"|format(prob*100) }}%</span> <!-- Leave abbreviation here -->
+          </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+  <div class="footer">
+    <p>Not a substitute for professional diagnosis.</p>
+    <p>
+      Learn more:
+      <a href="https://www.cancer.gov" target="_blank">Cancer.gov</a> |
+      <a href="https://www.aad.org/" target="_blank">AAD</a>
+    </p>
+  </div>
+
+  <script>
+    function previewImage(event) {
+      const preview = document.getElementById('imagePreview');
+      preview.innerHTML = '';
+      const file = event.target.files[0];
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          preview.appendChild(img);
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    function toggleMode() {
+      document.body.classList.toggle('light-mode');
+      const modeButton = document.querySelector('.mode-toggle');
+      modeButton.textContent = document.body.classList.contains('light-mode') ? '🌙' : '🌕';
+    }
+  </script>
+</body>
+</html>
