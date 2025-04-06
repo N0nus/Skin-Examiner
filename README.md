@@ -31,4 +31,19 @@ This web-based application is built using Flask and utilizes a PyTorch model to 
 
 2. Install the required Python packages
 
-3. Either train or install skin_lesion_model_b2.pth in root directory
+3. Either train or install skin_lesion_model_b2.pth in root directory (link to .pth file: https://drive.google.com/file/d/1GlgYeF787UHSKL9NSI1La33E4wy4FHSp/view?usp=sharing)
+
+## Usage
+
+1. Run the app.py file
+
+2. Open a browser and go to http://localhost:5000 to use the app
+
+## Model Training
+
+To train the model run the train.py script. Requires the HAM10000 dataset and metadata csv file.
+
+## Dataset Used
+
+HAM10000: https://www.kaggle.com/datasets/kmader/skin-cancer-mnist-ham10000/data
+
